@@ -114,37 +114,83 @@
 	});
 
 	/* ---------- Form submissions (demo handlers) ---------- */
+	/* ---------- Form submissions (AJAX Production Handler) ---------- */
 	const handleSubmit = (form, successMsg) => {
 		if (!form) return;
 		form.addEventListener("submit", (e) => {
-			e.preventDefault();
+			e.preventDefault(); // Keep this to handle it smoothly via AJAX
+
 			const btn = form.querySelector("button[type='submit']");
-			const original = btn ? btn.textContent : "";
+			const originalText = btn ? btn.textContent : "";
+
 			if (btn) {
 				btn.textContent = "Sending…";
 				btn.disabled = true;
 			}
-			setTimeout(() => {
-				if (btn) {
-					btn.textContent = successMsg;
-					btn.style.background = "var(--gold)";
-					btn.style.color = "var(--navy)";
-				}
-				form.reset();
-				setTimeout(() => {
-					if (btn) {
-						btn.textContent = original;
-						btn.disabled = false;
-						btn.style.background = "";
-						btn.style.color = "";
+
+			// Gather the actual input values from the form
+			const formData = new FormData(form);
+
+			// Send the data to your Formspree 'action' URL
+			fetch(form.action, {
+				method: form.method || "POST",
+				body: formData,
+				headers: {
+					Accept: "application/json",
+				},
+			})
+				.then((response) => {
+					if (response.ok) {
+						// Handle Success
+						if (btn) {
+							btn.textContent = successMsg;
+							btn.style.background = "var(--gold)";
+							btn.style.color = "var(--navy)";
+						}
+						form.reset();
+					} else {
+						// Handle Server Error responses
+						return response.json().then((data) => {
+							if (Object.hasOwn(data, "errors")) {
+								throw new Error(
+									data.errors
+										.map((error) => error.message)
+										.join(", "),
+								);
+							} else {
+								throw new Error(
+									"Submission failed. Please try again.",
+								);
+							}
+						});
 					}
-				}, 2800);
-			}, 700);
+				})
+				.catch((error) => {
+					// Handle Network errors or thrown exceptions
+					console.error("Form error:", error);
+					if (btn) {
+						btn.textContent = "Error sending ✗";
+						btn.style.background = "#ff4d4d"; // brief warning feedback
+						btn.style.color = "#fff";
+					}
+				})
+				.finally(() => {
+					// Re-enable the button after a brief window
+					setTimeout(() => {
+						if (btn) {
+							btn.textContent = originalText;
+							btn.disabled = false;
+							btn.style.background = "";
+							btn.style.color = "";
+
+							// Re-trigger gating validation check if applicable
+							if (typeof checkFields === "function")
+								checkFields();
+						}
+					}, 3500);
+				});
 		});
 	};
-	handleSubmit($("#form-request"), "Request sent ✓");
-	handleSubmit($("#form-apply"), "Application received ✓");
-	handleSubmit($("#ebookForm"), "Check your inbox ✓");
 
 	/* ---------- Smooth in-page nav offset for sticky header ---------- */
 	$$('a[href^="#"]').forEach((link) => {
