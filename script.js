@@ -130,44 +130,37 @@
 	});
 })();
 
-// ============== EBOOK BUTTON GATING ==============
-(function () {
-	const form = document.getElementById("ebookForm");
-	const btn = document.getElementById("ebookSubmit");
-	if (!form || !btn) return;
+// ============== FORM VALIDATION BUTTON GATING ==============
+(() => {
+	// 1. Handle Ebook Form
+	const ebookForm = document.getElementById("ebookForm");
+	const ebookBtn = document.getElementById("ebookSubmit");
 
-	function checkFields() {
-		const inputs = form.querySelectorAll(
-			"input[required], select[required]",
-		);
-		const allFilled = Array.from(inputs).every(
-			(el) => el.value.trim() !== "",
-		);
-		btn.disabled = !allFilled;
+	if (ebookForm && ebookBtn) {
+		const checkEbook = () => {
+			ebookBtn.disabled = !ebookForm.checkValidity();
+		};
+		ebookForm.addEventListener("input", checkEbook);
+		ebookForm.addEventListener("change", checkEbook);
+		checkEbook(); // Run initial check
 	}
 
-	form.addEventListener("input", checkFields);
-	form.addEventListener("change", checkFields);
-	checkFields(); // initial validation check
+	// 2. Handle Contact & Application Forms Safely
+	const contactForms = [
+		{ formId: "form-request", btnId: "reqSubmit" },
+		{ formId: "form-apply", btnId: "applySubmit" },
+	];
+
+	contactForms.forEach(({ formId, btnId }) => {
+		const form = document.getElementById(formId);
+		const btn = document.getElementById(btnId);
+		if (!form || !btn) return;
+
+		const checkForm = () => {
+			btn.disabled = !form.checkValidity();
+		};
+		form.addEventListener("input", checkForm);
+		form.addEventListener("change", checkForm);
+		checkForm(); // Run initial check
+	});
 })();
-
-// Gate all contact form buttons
-["form-request", "form-apply"].forEach(function (formId) {
-	const form = document.getElementById(formId);
-	if (!form) return;
-	const btnId = formId === "form-request" ? "reqSubmit" : "applySubmit";
-	const btn = document.getElementById(btnId);
-	if (!btn) return;
-	function check() {
-		const required = form.querySelectorAll(
-			"input[required], select[required], textarea[required]",
-		);
-		const filled = Array.from(required).every(
-			(el) => el.value.trim() !== "",
-		);
-		btn.disabled = !filled;
-	}
-	form.addEventListener("input", check);
-	form.addEventListener("change", check);
-	check();
-});
