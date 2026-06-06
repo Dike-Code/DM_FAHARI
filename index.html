@@ -1438,16 +1438,17 @@
 						<form
 							class="ebook-form"
 							id="ebookForm"
-							action="https://formspree.io/f/mkoejepp"
+							action="https://assets.mailerlite.com/jsonp/2342537/forms/189525721326028320/subscribe"
 							method="POST"
 							novalidate
 						>
+							<!-- action="https://formspree.io/f/mkoejepp" -->
 							<div class="field-row">
 								<label class="field">
 									<span>Name</span>
 									<input
 										type="text"
-										name="name"
+										name="fields[name]"
 										required
 										autocomplete="name"
 									/>
@@ -1456,7 +1457,7 @@
 									<span>Email</span>
 									<input
 										type="email"
-										name="email"
+										name="fields[email]"
 										required
 										autocomplete="email"
 									/>
@@ -1464,7 +1465,7 @@
 							</div>
 							<label class="field">
 								<span>Credential</span>
-								<select name="credential" required>
+								<select name="fields[role]" required>
 									<option value="">
 										Select your credential
 									</option>
